@@ -40,11 +40,13 @@ export const getTodo = async (id) => {
   }
   logger.log.success(`Getting todo with id: ${id}`)
   return await db.todos.findUnique({
-    where: {id: value,},
+    where: {
+      id: value,
+    },
   })
 }
 
-export const addTodo = (todo) => {
+export const addTodo = async (todo) => {
   logger.log.info(`Validating ${todo} to add`)
   const { error, value } = todoSchema.validate(todo)
 
@@ -54,32 +56,53 @@ export const addTodo = (todo) => {
   }
 
   logger.log.success(`Validated: ${todo}`)
-  const newTodo = await db.todos.create({data:{... value},select:{id:true, text: true, completed:true,},)
-  return newTodo 
+
+  const newTodo = await db.todos.create({
+    data: {
+      ...value,
+    },
+    select: {
+      id: true,
+      text: true,
+      completed: true,
+    },
+  })
+
+  return { newTodo }
 }
 
-export const  updateTodo = async (id, todo) =>{
+export const updateTodo = async (id, todo) => {
   logger.log.info(`Validating ${todo} for update`)
-  const {error: todoError, value: todoValue } = todoSchema.validate(todo)
+  const { error: todoError, value: todoValue } = todoSchema.validate(todo)
 
-  if(todoError){
+  if (todoError) {
     logger.log.error(new Error(`Validation error: ${todoError.message}`))
-    return {todoError}
+    return { todoError }
   }
 
-  logger.log.info(`Validation id: ${id}`)
-  const {error: idError, value: idValue} = idSchema.validate(id)
+  logger.log.info(`Validating id: ${id}`)
+  const { error: idError, value: idValue } = idSchema.validate(id)
 
-  if(idError){
+  if (idError) {
     logger.log.error(new Error(`Validation error: ${idError.message}`))
-    return {idError}
+    return { idError }
   }
 
   logger.log.success(`Validated todo and ID`)
-  const updateTodo = await db.todos.update({
-    where:{id:idValue,},
-    data:{...todoValue,},
-    select:{id:true, text:true, completed:true,},
+
+  const updatedTodo = await db.todos.update({
+    where: {
+      id: idValue,
+    },
+    data: {
+      ...todoValue,
+    },
+    select: {
+      id: true,
+      text: true,
+      completed: true,
+    },
   })
-  return {updateTodo}
+
+  return { updatedTodo }
 }

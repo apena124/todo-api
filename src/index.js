@@ -21,7 +21,7 @@ app.use(
     origin: config.origin,
   }),
 )
-app.use(auth.initialize)
+app.use(auth.initialize())
 app.use(router)
 
 app.use(errors.notFound)
